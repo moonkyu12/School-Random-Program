@@ -26,3 +26,4 @@
 - `script.js`: 자리 배치 로직, 파일 입출력, 랜덤/히스토리 기능
 # AI가 프론트해줌 따질꺼면 OpenAI한테 따지십쇼!
 # 끝났다야비쉬!
+# School-Random-Program
