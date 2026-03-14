@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자리 뽑기 앱</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="app-header card">
+      <div class="title-wrap">
+        <div class="icon-badge" aria-hidden="true">
+          <svg viewBox="0 0 64 64">
+            <rect x="6" y="10" width="52" height="34" rx="4" fill="#2e5b45" />
+            <rect x="9" y="13" width="46" height="28" rx="3" fill="#224735" />
+            <rect x="14" y="22" width="16" height="2.5" fill="#e8f7ef" />
+            <rect x="14" y="28" width="24" height="2.5" fill="#e8f7ef" />
+            <rect x="14" y="34" width="12" height="2.5" fill="#e8f7ef" />
+            <rect x="4" y="44" width="56" height="6" rx="3" fill="#7a5a36" />
+          </svg>
+        </div>
+        <div>
+          <h1>학교 자리 뽑기</h1>
+          <p class="subtitle">교실 자리표</p>
+        </div>
+      </div>
+      <div id="statusBox" class="status-box" role="status" aria-live="polite">대기 중</div>
+    </header>
+
+    <div class="quick-actions">
+      <div class="layout-inputs">
+        <label for="rowsInput">행</label>
+        <input id="rowsInput" type="number" min="2" max="10" value="4" />
+        <label for="colsInput">열</label>
+        <input id="colsInput" type="number" min="2" max="10" value="5" />
+      </div>
+      <div class="action-buttons">
+        <div class="buttons-left">
+          <button id="loadTxtBtn" class="btn neutral">TXT 불러오기</button>
+          <button id="drawBtn" class="btn primary">랜덤 배치하기</button>
+          <button id="undoBtn" class="btn nav-btn undo-btn" title="뒤로가기">←</button>
+          <button id="redoBtn" class="btn nav-btn redo-btn" title="앞으로가기">→</button>
+          <button id="clearAllBtn" class="btn danger">전체 지우기</button>
+          <button id="saveImageBtn" class="btn neutral">이미지 저장</button>
+        </div>
+        <div class="buttons-right">
+          <button id="saveStateBtn" class="btn neutral">💾 저장</button>
+          <button id="loadStateBtn" class="btn neutral">📂 불러오기</button>
+        </div>
+      </div>
+      <input id="txtFileInput" type="file" accept=".txt,text/plain" hidden />
+      <input id="stateFileInput" type="file" accept=".json" hidden />
+    </div>
+
+    <div class="app-content">
+      <section class="card board-card">
+      <div class="teacher-board">칠판</div>
+      <div class="teacher-desk">앞쪽 교탁</div>
+      <div id="seatBoard" class="seat-board" aria-live="polite"></div>
+      </section>
+    </div>
+  </main>
+
+  <aside id="confirmModal" class="confirm-modal" hidden>
+    <div class="confirm-card">
+      <h3>확인</h3>
+      <p id="confirmMessage">진행할까요?</p>
+      <div class="confirm-actions">
+        <button id="confirmCancelBtn" class="btn neutral">취소</button>
+        <button id="confirmOkBtn" class="btn primary">확인</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Input Modal -->
+  <div id="inputModal" class="input-modal" hidden>
+    <div class="input-card">
+      <h3 id="inputTitle">입력하세요</h3>
+      <input type="text" id="inputField" class="input-field" placeholder="">
+      <div class="input-actions">
+        <button id="inputCancelBtn" class="btn neutral">취소</button>
+        <button id="inputOkBtn" class="btn primary">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <template id="seatTemplate">
+    <article class="seat-card">
+      <button type="button" class="seat-main">
+        <span class="seat-number">1번 자리</span>
+        <div class="seat-figure" aria-hidden="true">
+          <svg viewBox="0 0 120 120">
+            <rect x="72" y="52" width="26" height="38" rx="6" fill="#2e466f" />
+            <rect x="58" y="70" width="44" height="9" rx="4.5" fill="#415f93" />
+            <rect x="74" y="88" width="7" height="18" rx="3.5" fill="#273b5c" />
+            <rect x="91" y="88" width="7" height="18" rx="3.5" fill="#273b5c" />
+            <circle cx="45" cy="37" r="12" fill="#f5c8a3" />
+            <path d="M34 53c0-7 6-12 13-12h4c7 0 13 5 13 12v10H34z" fill="#4f88d1" />
+            <path d="M62 70H41c-5 0-9 4-9 9v6h30z" fill="#394f78" />
+            <rect x="34" y="84" width="8" height="17" rx="3" fill="#2f4265" />
+            <rect x="48" y="84" width="8" height="17" rx="3" fill="#2f4265" />
+          </svg>
+        </div>
+        <span class="seat-name">빈자리</span>
+      </button>
+      <div class="seat-tools">
+        <button type="button" class="tool-btn fixed-btn">고정</button>
+        <button type="button" class="tool-btn blocked-btn">금지</button>
+        <button type="button" class="tool-btn clear-btn">X</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
