@@ -31,9 +31,21 @@
     <div class="quick-actions">
       <div class="layout-inputs">
         <label for="rowsInput">행</label>
-        <input id="rowsInput" type="number" min="2" max="10" value="4" />
+        <div class="number-field">
+          <input id="rowsInput" type="number" min="2" max="10" value="4" />
+          <div class="number-stepper-buttons">
+            <button type="button" class="stepper-btn" data-target="rowsInput" data-step="1" aria-label="행 늘리기">▲</button>
+            <button type="button" class="stepper-btn" data-target="rowsInput" data-step="-1" aria-label="행 줄이기">▼</button>
+          </div>
+        </div>
         <label for="colsInput">열</label>
-        <input id="colsInput" type="number" min="2" max="10" value="5" />
+        <div class="number-field">
+          <input id="colsInput" type="number" min="2" max="10" value="5" />
+          <div class="number-stepper-buttons">
+            <button type="button" class="stepper-btn" data-target="colsInput" data-step="1" aria-label="열 늘리기">▲</button>
+            <button type="button" class="stepper-btn" data-target="colsInput" data-step="-1" aria-label="열 줄이기">▼</button>
+          </div>
+        </div>
       </div>
       <div class="action-buttons">
         <div class="buttons-left">
@@ -47,7 +59,13 @@
         <div class="buttons-right">
           <div class="countdown-wrap">
             <label for="countdownInput">카운트</label>
-            <input id="countdownInput" type="number" min="0" max="10" value="3" />
+            <div class="number-field">
+              <input id="countdownInput" type="number" min="0" max="10" value="3" />
+              <div class="number-stepper-buttons">
+                <button type="button" class="stepper-btn" data-target="countdownInput" data-step="1" aria-label="카운트 늘리기">▲</button>
+                <button type="button" class="stepper-btn" data-target="countdownInput" data-step="-1" aria-label="카운트 줄이기">▼</button>
+              </div>
+            </div>
           </div>
           <button id="saveStateBtn" class="btn neutral">💾 저장</button>
           <button id="loadStateBtn" class="btn neutral">📂 불러오기</button>

@@ -144,7 +144,7 @@ h1 {
 
 .layout-inputs {
   display: grid;
-  grid-template-columns: auto 60px auto 60px;
+  grid-template-columns: auto 78px auto 78px;
   align-items: center;
   gap: 5px;
 }
@@ -152,6 +152,84 @@ h1 {
 .layout-inputs label {
   font-size: 13px;
   font-weight: 700;
+}
+
+.number-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18px;
+  align-items: stretch;
+  width: 78px;
+  min-width: 0;
+  border: 1px solid #aac5e3;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.number-field:focus-within {
+  border-color: #0b4ea9;
+  box-shadow: 0 0 0 3px rgba(11, 78, 169, 0.16);
+}
+
+.number-field input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  padding: 5px 6px;
+  font-size: 13px;
+  color: #17314d;
+  font-weight: 700;
+  text-align: center;
+  background: transparent;
+  -moz-appearance: textfield;
+}
+
+.number-field input[type="number"]:focus {
+  box-shadow: none;
+}
+
+.number-field input[type="number"]::-webkit-outer-spin-button,
+.number-field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.number-stepper-buttons {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  border-left: 1px solid #cbdcf0;
+}
+
+.stepper-btn {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  padding: 0;
+  border: 0;
+  background: #eef5ff;
+  color: #315e89;
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stepper-btn:hover {
+  background: #dcecff;
+}
+
+.stepper-btn:active {
+  background: #cfe3ff;
+}
+
+.stepper-btn + .stepper-btn {
+  border-top: 1px solid #cbdcf0;
+}
+
+.number-field input[type="number"]:disabled + .number-stepper-buttons .stepper-btn,
+.stepper-btn:disabled {
+  cursor: default;
+  color: #8da2b8;
+  background: #f4f7fb;
 }
 
 .action-buttons {
@@ -189,14 +267,11 @@ h1 {
 }
 
 .countdown-wrap input[type="number"] {
-  width: 52px;
   padding: 4px 6px;
-  border: 1px solid #aac5e3;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #17314d;
-  font-weight: 700;
-  text-align: center;
+}
+
+.countdown-wrap .number-field {
+  width: 70px;
 }
 
 .controls-card {

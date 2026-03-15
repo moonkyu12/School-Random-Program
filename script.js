@@ -1,8 +1,8 @@
 'use strict';
 
 const CONFIG = { // AI야 고~~~맙다 정리를 이렇게~나 잘해해줭~
-  DEFAULT_ROWS: 6,
-  DEFAULT_COLS: 5,
+  DEFAULT_ROWS: 5,
+  DEFAULT_COLS: 6,
   DEFAULT_COUNTDOWN_SECONDS: 3,
   MIN_COUNTDOWN_SECONDS: 0,
   MAX_COUNTDOWN_SECONDS: 10,
@@ -55,6 +55,7 @@ const DOM = {
   countdownInput: document.getElementById("countdownInput"),
   countdownOverlay: document.getElementById("countdownOverlay"),
   countdownNumber: document.getElementById("countdownNumber"),
+  stepperButtons: document.querySelectorAll(".stepper-btn"),
 };
 
 let state = {
@@ -69,6 +70,32 @@ let isCountingDown = false;
 
 function clamp(v, min, max) {
   return Math.min(max, Math.max(min, v));
+}
+
+function getNumberInputValue(input) {
+  const parsed = parseFloat(input.value);
+  if (Number.isFinite(parsed)) return parsed;
+
+  const min = parseFloat(input.min);
+  if (Number.isFinite(min)) return min;
+  return 0;
+}
+
+function nudgeNumberInput(input, direction) {
+  if (!input || input.disabled) return;
+
+  const min = parseFloat(input.min);
+  const max = parseFloat(input.max);
+  const stepAttr = parseFloat(input.step);
+  const step = Number.isFinite(stepAttr) && stepAttr > 0 ? stepAttr : 1;
+
+  let next = getNumberInputValue(input) + (step * direction);
+  if (Number.isFinite(min)) next = Math.max(min, next);
+  if (Number.isFinite(max)) next = Math.min(max, next);
+
+  input.value = String(next);
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+  input.focus({ preventScroll: true });
 }
 
 function secureRandomInt(max) {
@@ -636,6 +663,17 @@ function attachEvents() {
 
   DOM.rowsInput.addEventListener("change", handleLayoutChange);
   DOM.colsInput.addEventListener("change", handleLayoutChange);
+  DOM.stepperButtons.forEach(button => {
+    button.addEventListener("mousedown", e => e.preventDefault());
+    button.addEventListener("click", () => {
+      const targetId = button.dataset.target;
+      const direction = parseInt(button.dataset.step || "0", 10);
+      if (!targetId || !direction) return;
+      const input = document.getElementById(targetId);
+      if (!(input instanceof HTMLInputElement)) return;
+      nudgeNumberInput(input, direction);
+    });
+  });
 
   document.addEventListener("keydown", e => {
     if (isCountingDown) return;
