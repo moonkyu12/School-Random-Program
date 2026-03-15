@@ -26,7 +26,7 @@ const MESSAGES = {
   SAVE_SUCCESS: "자리배치를 저장했어요!",
   LOAD_SUCCESS: "자리배치를 불러왔어요!",
 };
-// 내가 이걸 왜한거지? 왜 정리를 한걸까 ㅈ머ㅐㅠ매ㅕ누ㅑㅔㅁ휴매ㅠ냐ㅐ ㅁ잘 ㅠㅕㅁ9ㅑㅐㅓ 헤ㅐㅑ뉴[ㅕㅑㅐㅔㅁ]
+// 내가 이걸 왜한거지? 왜 정리를 한걸까 ㅈ머ㅐㅠ매ㅕ누ㅑㅔㅁ휴매ㅠ냐ㅐ ㅁ잘 ㅠㅕㅁ9ㅑㅐㅓ 헤ㅐㅑ뉴[ㅕㅑㅐㅔㅁ].
 const DOM = {
   rowsInput: document.getElementById("rowsInput"),
   colsInput: document.getElementById("colsInput"),
