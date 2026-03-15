@@ -24,6 +24,27 @@
 - `index.html`: 화면 구조
 - `style.css`: UI 스타일
 - `script.js`: 자리 배치 로직, 파일 입출력, 랜덤/히스토리 기능
-# AI가 프론트해줌 따질꺼면 OpenAI한테 따지십쇼!
-# 끝났다야비쉬!
+- AI가 프론트해줌 따질꺼면 OpenAI한테 따지십쇼!
+- 끝났다야비쉬!
+
+# 사용 안내
+
+이 프로젝트는 개인용으로 제작된 페이지입니다.
+
+저작자의 사전 허락 없이 아래 행위를 금지합니다.
+
+- 소스코드 복제
+- 디자인 도용
+- 수정 및 재배포
+- 재업로드
+- 상업적 사용
+- 본 프로젝트 또는 일부를 이용한 다른 웹사이트, 프로그램, 앱, 서비스 제작
+- 자동화, 크롤링, 봇, 데이터 수집, AI 학습 데이터 활용
+
+이 저장소는 공개 열람만 허용하며, 사용 권한은 부여되지 않습니다.
+
+## Notice
+
+This repository is published for public viewing only.  
+Unauthorized copying, modification, redistribution, reuse, commercial use, or creation of derivative works is prohibited.
 # School-Random-Program
