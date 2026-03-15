@@ -3,6 +3,9 @@
 const CONFIG = { // AI야 고~~~맙다 정리를 이렇게~나 잘해해줭~
   DEFAULT_ROWS: 6,
   DEFAULT_COLS: 5,
+  DEFAULT_COUNTDOWN_SECONDS: 3,
+  MIN_COUNTDOWN_SECONDS: 0,
+  MAX_COUNTDOWN_SECONDS: 10,
   MIN_LAYOUT: 2,
   MAX_LAYOUT: 10,
   MAX_UNDO_STACK: 40,
@@ -49,6 +52,9 @@ const DOM = {
   inputCancelBtn: document.getElementById("inputCancelBtn"),
   saveStateBtn: document.getElementById("saveStateBtn"),
   loadStateBtn: document.getElementById("loadStateBtn"),
+  countdownInput: document.getElementById("countdownInput"),
+  countdownOverlay: document.getElementById("countdownOverlay"),
+  countdownNumber: document.getElementById("countdownNumber"),
 };
 
 let state = {
@@ -58,6 +64,8 @@ let state = {
   undoStack: [],
   redoStack: [],
 };
+
+let isCountingDown = false;
 
 function clamp(v, min, max) {
   return Math.min(max, Math.max(min, v));
@@ -131,6 +139,70 @@ function setStatus(text, kind = "idle") {
   if (kind !== "idle") {
     DOM.statusBox.classList.add(`is-${kind}`);
   }
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getMovableNames() {
+  return state.seats.filter(s => s.name && !s.fixed).map(s => s.name);
+}
+
+function getAvailableSeatIndices() {
+  return state.seats
+    .map((s, i) => (!s.fixed && !s.blocked ? i : -1))
+    .filter(i => i !== -1);
+}
+
+function getCountdownSeconds() {
+  const inputValue = parseInt(DOM.countdownInput?.value || "", 10);
+  const normalized = Number.isFinite(inputValue) ? inputValue : CONFIG.DEFAULT_COUNTDOWN_SECONDS;
+  const clamped = clamp(normalized, CONFIG.MIN_COUNTDOWN_SECONDS, CONFIG.MAX_COUNTDOWN_SECONDS);
+  DOM.countdownInput.value = clamped;
+  return clamped;
+}
+
+function renderShufflePreview() {
+  const names = getMovableNames();
+  if (!names.length) return;
+
+  const shuffledNames = shuffle(names);
+  const shuffledIndices = shuffle(getAvailableSeatIndices());
+  const displayMap = new Map();
+  const count = Math.min(shuffledNames.length, shuffledIndices.length);
+
+  for (let i = 0; i < count; i++) {
+    displayMap.set(shuffledIndices[i], shuffledNames[i]);
+  }
+
+  const cards = DOM.seatBoard.querySelectorAll(".seat-card");
+  cards.forEach((card, idx) => {
+    const seat = state.seats[idx];
+    if (!seat || seat.fixed || seat.blocked) return;
+    const name = card.querySelector(".seat-name");
+    if (!name) return;
+    name.textContent = displayMap.get(idx) || "빈자리";
+  });
+}
+
+function setCountdownOverlayNumber(value) {
+  DOM.countdownNumber.textContent = String(value);
+  DOM.countdownNumber.classList.remove("pop");
+  void DOM.countdownNumber.offsetWidth;
+  DOM.countdownNumber.classList.add("pop");
+}
+
+async function runCountdown(seconds) {
+  if (seconds <= 0) return;
+
+  DOM.countdownOverlay.hidden = false;
+  for (let sec = seconds; sec >= 1; sec--) {
+    setCountdownOverlayNumber(sec);
+    setStatus(`${sec}...`, "idle");
+    await wait(1000);
+  }
+  DOM.countdownOverlay.hidden = true;
 }
 
 function openInputDialog(title, defaultValue = "") {
@@ -267,7 +339,7 @@ function handleLayoutChange() {
 }
 
 function randomizeSeats() {
-  const names = state.seats.filter(s => s.name && !s.fixed).map(s => s.name);
+  const names = getMovableNames();
   if (!names.length) {
     setStatus(MESSAGES.NO_NAMES, "warn");
     return;
@@ -275,10 +347,7 @@ function randomizeSeats() {
 
   pushUndo("랜덤 배치");
   const shuffledNames = shuffle(names);
-  const available = state.seats
-    .map((s, i) => (!s.fixed && !s.blocked ? i : -1))
-    .filter(i => i !== -1);
-  const shuffledIndices = shuffle(available);
+  const shuffledIndices = shuffle(getAvailableSeatIndices());
 
   state.seats.forEach(s => {
     if (!s.fixed && !s.blocked) s.name = "";
@@ -291,6 +360,40 @@ function randomizeSeats() {
 
   refreshUI();
   setStatus(`${shuffledNames.length}${MESSAGES.RANDOM_SUCCESS}`, "success");
+}
+
+async function handleDrawWithCountdown() {
+  if (isCountingDown) return;
+
+  const names = getMovableNames();
+  if (!names.length) {
+    setStatus(MESSAGES.NO_NAMES, "warn");
+    return;
+  }
+
+  const seconds = getCountdownSeconds();
+  if (seconds <= 0) {
+    randomizeSeats();
+    return;
+  }
+
+  isCountingDown = true;
+  DOM.drawBtn.disabled = true;
+  DOM.countdownInput.disabled = true;
+
+  const previewTimer = setInterval(renderShufflePreview, 150);
+  try {
+    renderShufflePreview();
+    await runCountdown(seconds);
+    randomizeSeats();
+  } finally {
+    clearInterval(previewTimer);
+    DOM.countdownOverlay.hidden = true;
+    DOM.drawBtn.disabled = false;
+    DOM.countdownInput.disabled = false;
+    isCountingDown = false;
+    refreshUI();
+  }
 }
 
 function clearAll() {
@@ -518,7 +621,7 @@ function handleStateLoad(e) {
 }
 
 function attachEvents() {
-  DOM.drawBtn.addEventListener("click", randomizeSeats);
+  DOM.drawBtn.addEventListener("click", handleDrawWithCountdown);
   DOM.undoBtn.addEventListener("click", undoLast);
   DOM.redoBtn.addEventListener("click", redoLast);
   DOM.clearAllBtn.addEventListener("click", clearAll);
@@ -535,6 +638,7 @@ function attachEvents() {
   DOM.colsInput.addEventListener("change", handleLayoutChange);
 
   document.addEventListener("keydown", e => {
+    if (isCountingDown) return;
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
       e.preventDefault();
       undoLast();
@@ -551,6 +655,7 @@ function init() {
   state.seats = normalizeSeats(CONFIG.DEFAULT_ROWS, CONFIG.DEFAULT_COLS);
   DOM.rowsInput.value = CONFIG.DEFAULT_ROWS;
   DOM.colsInput.value = CONFIG.DEFAULT_COLS;
+  DOM.countdownInput.value = CONFIG.DEFAULT_COUNTDOWN_SECONDS;
   refreshUI();
   setStatus("준비 완료", "idle");
   attachEvents();

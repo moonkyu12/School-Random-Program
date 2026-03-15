@@ -45,6 +45,10 @@
           <button id="saveImageBtn" class="btn neutral">이미지 저장</button>
         </div>
         <div class="buttons-right">
+          <div class="countdown-wrap">
+            <label for="countdownInput">카운트</label>
+            <input id="countdownInput" type="number" min="0" max="10" value="3" />
+          </div>
           <button id="saveStateBtn" class="btn neutral">💾 저장</button>
           <button id="loadStateBtn" class="btn neutral">📂 불러오기</button>
         </div>
@@ -83,6 +87,10 @@
         <button id="inputOkBtn" class="btn primary">확인</button>
       </div>
     </div>
+  </div>
+
+  <div id="countdownOverlay" class="countdown-overlay" hidden aria-live="assertive" aria-atomic="true">
+    <span id="countdownNumber" class="countdown-number">3</span>
   </div>
 
   <template id="seatTemplate">

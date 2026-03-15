@@ -171,6 +171,34 @@ h1 {
   align-items: center;
 }
 
+.countdown-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid #b8cfea;
+  border-radius: 8px;
+  background: #f2f8ff;
+}
+
+.countdown-wrap label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #315e89;
+  white-space: nowrap;
+}
+
+.countdown-wrap input[type="number"] {
+  width: 52px;
+  padding: 4px 6px;
+  border: 1px solid #aac5e3;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #17314d;
+  font-weight: 700;
+  text-align: center;
+}
+
 .controls-card {
   display: none;
 }
@@ -637,6 +665,44 @@ h3 {
   justify-content: flex-end;
   gap: 8px;
 }
+
+.countdown-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 20, 38, 0.36);
+  display: grid;
+  place-items: center;
+  z-index: 60;
+  pointer-events: auto;
+}
+
+.countdown-number {
+  font-size: clamp(72px, 18vw, 180px);
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.countdown-number.pop {
+  animation: countdown-pop 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes countdown-pop {
+  0% {
+    transform: scale(0.52);
+    opacity: 0;
+  }
+  35% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.97);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 980px) {
   .app-content {
     flex-direction: column;
@@ -685,6 +751,15 @@ h3 {
   .action-buttons {
     flex-direction: column;
     width: 100%;
+  }
+
+  .buttons-right {
+    width: 100%;
+  }
+
+  .countdown-wrap {
+    width: 100%;
+    justify-content: center;
   }
 
   .btn {
