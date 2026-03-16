@@ -1,8 +1,8 @@
 'use strict';
 
 const CONFIG = { // AI야 고~~~맙다 정리를 이렇게~나 잘해해줭~
-  DEFAULT_ROWS: 5,
-  DEFAULT_COLS: 6,
+  DEFAULT_ROWS: 6,
+  DEFAULT_COLS: 5,
   DEFAULT_COUNTDOWN_SECONDS: 3,
   MIN_COUNTDOWN_SECONDS: 0,
   MAX_COUNTDOWN_SECONDS: 10,
@@ -13,7 +13,6 @@ const CONFIG = { // AI야 고~~~맙다 정리를 이렇게~나 잘해해줭~
 // 음.......안해ㅣ
 const MESSAGES = {
   BLOCKED_SEAT: "사용 불가 자리에는 이름을 추가할 수 없어요.",
-  DUPLICATE_NAME: "이미 이름이 있습니다. X 버튼으로 삭제 후 다시 추가해주세요.",
   INPUT_NAME_PROMPT: "번 자리의 이름을 입력하세요:",
   EMPTY_INPUT: "이름을 입력해주세요.",
   NO_NAMES: "배치할 이름이 없어요. 자리에 이름을 추가해주세요.",
@@ -36,9 +35,9 @@ const DOM = {
   redoBtn: document.getElementById("redoBtn"),
   clearAllBtn: document.getElementById("clearAllBtn"),
   saveImageBtn: document.getElementById("saveImageBtn"),
-  txtFileInput: document.getElementById("txtFileInput"),
-  stateFileInput: document.getElementById("stateFileInput"),
-  statusBox: document.getElementById("statusBox"),
+  txtFileInput: document.getElementById("txtFileInput"),// 와.....ㅆ...이건 진짜 뭐지?
+  stateFileInput: document.getElementById("stateFileInput"), // AI한테 하길잘했다...
+  statusBox: document.getElementById("statusBox"),// 내가 했으면 오곡중 하나인 잣이 될뻔했군
   seatBoard: document.getElementById("seatBoard"),
   seatTemplate: document.getElementById("seatTemplate"),
   confirmModal: document.getElementById("confirmModal"),
@@ -282,12 +281,9 @@ async function renameSeat(idx) {
     setStatus(MESSAGES.BLOCKED_SEAT, "warn");
     return;
   }
-  if (seat.name) {
-    setStatus(MESSAGES.DUPLICATE_NAME, "warn");
-    return;
-  }
-
-  const name = await openInputDialog(`${idx + 1}${MESSAGES.INPUT_NAME_PROMPT}`);
+// 이제 요시부터 바꿔야함
+  const previousName = seat.name.trim();
+  const name = await openInputDialog(`${idx + 1}${MESSAGES.INPUT_NAME_PROMPT}`, seat.name);
   if (name === null) return;
 
   const trimmed = name.trim();
@@ -295,13 +291,19 @@ async function renameSeat(idx) {
     setStatus(MESSAGES.EMPTY_INPUT, "warn");
     return;
   }
+  if (trimmed === previousName) return;
 
-  pushUndo("이름 추가");
+  pushUndo(previousName ? "이름 변경" : "이름 추가");
   seat.name = trimmed;
   refreshUI();
-  setStatus(`${idx + 1}번 자리에 ${trimmed}을(를) 추가했어요.`, "success");
+  setStatus( //원래 있던 이미 이름이 있습니다. 삭제
+    previousName
+      ? `${idx + 1}번 자리 이름을 ${trimmed}(으)로 변경했어요.`
+      : `${idx + 1}번 자리에 ${trimmed}을(를) 추가했어요.`,
+    "success"
+  );
 }
-
+// 음~~~바로 끝~
 function toggleFixed(idx) {
   const seat = state.seats[idx];
   if (!seat || seat.blocked) {
@@ -371,13 +373,13 @@ function randomizeSeats() {
     setStatus(MESSAGES.NO_NAMES, "warn");
     return;
   }
-
+  // 요기가 배치하는부분으로 만들꺼임
   pushUndo("랜덤 배치");
   const shuffledNames = shuffle(names);
   const shuffledIndices = shuffle(getAvailableSeatIndices());
 
   state.seats.forEach(s => {
-    if (!s.fixed && !s.blocked) s.name = "";
+    if (!s.fixed && !s.blocked) s.name = ""; // 
   });
 
   const cnt = Math.min(shuffledIndices.length, shuffledNames.length);
@@ -455,6 +457,7 @@ function redoLast() {
 function renderBoard() {
   DOM.seatBoard.innerHTML = "";
   DOM.seatBoard.style.setProperty("--cols", state.cols);
+  DOM.seatBoard.style.setProperty("--rows", state.rows);
 
   if (!state.seats.length) {
     const empty = document.createElement("div");
@@ -463,36 +466,42 @@ function renderBoard() {
     DOM.seatBoard.append(empty);
     return;
   }
-
+  // 행을 바꿔야함 위에서 아래로
   const frag = document.createDocumentFragment(); // 크~ 이딴걸 내가 왜 했지
-  state.seats.forEach((seat, idx) => {
-    const card = DOM.seatTemplate.content.firstElementChild.cloneNode(true);
-    const main = card.querySelector(".seat-main");
-    const num = card.querySelector(".seat-number");
-    const name = card.querySelector(".seat-name");// 진짜~ 이름 금나 구리넹
-    const fixBtn = card.querySelector(".fixed-btn");
-    const blockBtn = card.querySelector(".blocked-btn");
-    const clearBtn = card.querySelector(".clear-btn");
+  for (let row = 0; row < state.rows; row++) {
+    for (let col = 0; col < state.cols; col++) {
+      const idx = row * state.cols + col;
+      const seat = state.seats[idx];
+      if (!seat) continue;
 
-    num.textContent = `${idx + 1}번 자리`;
-    name.textContent = seat.blocked ? "사용불가" : (seat.name || "빈자리");
+      const card = DOM.seatTemplate.content.firstElementChild.cloneNode(true);
+      const main = card.querySelector(".seat-main");
+      const num = card.querySelector(".seat-number");
+      const name = card.querySelector(".seat-name");// 진짜~ 이름 금나 구리넹
+      const fixBtn = card.querySelector(".fixed-btn");
+      const blockBtn = card.querySelector(".blocked-btn");
+      const clearBtn = card.querySelector(".clear-btn");
 
-    card.classList.toggle("is-fixed", seat.fixed && !seat.blocked);
-    card.classList.toggle("is-blocked", seat.blocked);
-    card.classList.toggle("is-empty", !seat.name && !seat.blocked);
+      num.textContent = `${idx + 1}번 자리`;
+      name.textContent = seat.blocked ? "사용불가" : (seat.name || "빈자리");
 
-    fixBtn.classList.toggle("active", seat.fixed && !seat.blocked);
-    blockBtn.classList.toggle("active", seat.blocked);
-    fixBtn.disabled = seat.blocked || !seat.name;
-    clearBtn.disabled = !seat.name && !seat.fixed;
+      card.classList.toggle("is-fixed", seat.fixed && !seat.blocked);
+      card.classList.toggle("is-blocked", seat.blocked);
+      card.classList.toggle("is-empty", !seat.name && !seat.blocked);
+      // 음....하기 싫구만
+      fixBtn.classList.toggle("active", seat.fixed && !seat.blocked);
+      blockBtn.classList.toggle("active", seat.blocked);
+      fixBtn.disabled = seat.blocked || !seat.name;
+      clearBtn.disabled = !seat.name && !seat.fixed;
 
-    main.addEventListener("click", () => renameSeat(idx));
-    fixBtn.addEventListener("click", () => toggleFixed(idx));
-    blockBtn.addEventListener("click", () => toggleBlocked(idx));
-    clearBtn.addEventListener("click", () => clearSeat(idx)); // ida ida diadadaidaidaidcaidaidadiadaidai
+      main.addEventListener("click", () => renameSeat(idx));
+      fixBtn.addEventListener("click", () => toggleFixed(idx));
+      blockBtn.addEventListener("click", () => toggleBlocked(idx));
+      clearBtn.addEventListener("click", () => clearSeat(idx)); // ida ida diadadaidaidaidcaidaidadiadaidai
 
-    frag.append(card);
-  });
+      frag.append(card);
+    }
+  }
 
   DOM.seatBoard.append(frag);
 }
@@ -578,7 +587,7 @@ function handleTxtUpload(e) {
   reader.readAsText(file);
   DOM.txtFileInput.value = "";
 }
-
+// 세이브 스테이트는 자리배치 상태를 JSON 파일로 저장하기.
 function saveState() {
   const data = {
     rows: state.rows,
@@ -615,7 +624,7 @@ function handleStateLoad(e) {
   reader.onload = ev => {
     try {
       const text = ev.target?.result;
-      if (typeof text !== "string") return;
+      if (typeof text !== "string") return; // 파일이 텍스트가 아니면 무시 이걸로ㅋㅋ  백도어 하면 ㅋㅋㅋㅋ
 
       const data = JSON.parse(text);
       if (!data.rows || !data.cols || !Array.isArray(data.seats)) {
@@ -630,7 +639,7 @@ function handleStateLoad(e) {
         name: s.name || "",
         fixed: Boolean(s.fixed),
         blocked: Boolean(s.blocked),
-      }));
+      })); // 아 뻐쓰 퉥쉬 오랜쥐 빠이
 
       DOM.rowsInput.value = state.rows;
       DOM.colsInput.value = state.cols;
@@ -646,7 +655,18 @@ function handleStateLoad(e) {
   reader.readAsText(file);
   DOM.stateFileInput.value = "";
 }
-
+//
+/**
+ * Iawdbojuadniapsdbauba
+ * iajeofbpiadbipbadf
+ * aiebhpkaefbfadeb
+ * ]aSIUbspibgifphb
+ * awbgeiaobafdbsa
+ * asiofbapgeifgadigpbgda
+ * aefo hbpiaefqafe afge[pihj
+ * 나는 바보당]
+ * 이히히히
+ */
 function attachEvents() {
   DOM.drawBtn.addEventListener("click", handleDrawWithCountdown);
   DOM.undoBtn.addEventListener("click", undoLast);
@@ -661,8 +681,8 @@ function attachEvents() {
   DOM.loadStateBtn.addEventListener("click", () => DOM.stateFileInput.click());
   DOM.stateFileInput.addEventListener("change", handleStateLoad);
 
-  DOM.rowsInput.addEventListener("change", handleLayoutChange);
-  DOM.colsInput.addEventListener("change", handleLayoutChange);
+  DOM.rowsInput.addEventListener("change", handleLayoutChange); // 레이아웃 변경 이벤트 핸들러 등록
+  DOM.colsInput.addEventListener("change", handleLayoutChange);// 레이아웃 변경 이벤트 핸들러 등록
   DOM.stepperButtons.forEach(button => {
     button.addEventListener("mousedown", e => e.preventDefault());
     button.addEventListener("click", () => {
