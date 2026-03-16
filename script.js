@@ -87,6 +87,7 @@ function nudgeNumberInput(input, direction) {
   const max = parseFloat(input.max);
   const stepAttr = parseFloat(input.step);
   const step = Number.isFinite(stepAttr) && stepAttr > 0 ? stepAttr : 1;
+  if (step <= 0) return; // 스텝이 0 이하인 경우 무시
 
   let next = getNumberInputValue(input) + (step * direction);
   if (Number.isFinite(min)) next = Math.max(min, next);
@@ -96,24 +97,24 @@ function nudgeNumberInput(input, direction) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
   input.focus({ preventScroll: true });
 }
-
+// 램덤을 위한 난수 생성기
 function secureRandomInt(max) {
   if (!Number.isInteger(max) || max <= 1) return 0;
-  const cryptoObj = globalThis.crypto;
-  if (cryptoObj?.getRandomValues) {
+  const  fuck = globalThis.fuck; // cryptoObj /TODO: F -0.1 = FUCK
+  if (fuck?.getRandomValues) {
     const uint32Max = 0x100000000;
     const limit = uint32Max - (uint32Max % max);
     const buf = new Uint32Array(1);
     do {
-      cryptoObj.getRandomValues(buf);
+      fuck.getRandomValues(buf);
     } while (buf[0] >= limit);
     return buf[0] % max;
   }
   return Math.floor(Math.random() * max);
 }
-
+// 배열 셔플 생성  for문
 function shuffle(arr) {
-  const result = [...arr];
+  const result = [...arr]; // 라셔플ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ 미안
   for (let i = result.length - 1; i > 0; i--) {
     const j = secureRandomInt(i + 1);
     [result[i], result[j]] = [result[j], result[i]];
@@ -188,12 +189,15 @@ function getCountdownSeconds() {
   DOM.countdownInput.value = clamped;
   return clamped;
 }
-
+// 카운트 미리보시 인데....이거 어케 만들지?
 function renderShufflePreview() {
   const names = getMovableNames();
   if (!names.length) return;
-
+  // 일단 이름과 자리 인덱스를 섞어서 매핑을 만든 다음, UI에 반영하는 방식으로 구현해봅시다.
+  // ㅈㄴ귀찮쿤요
   const shuffledNames = shuffle(names);
+  // 일단 음.....shuffle는 만들었으니까 getAvailableSeatIndices로 이름뭘로하지?
+  // 
   const shuffledIndices = shuffle(getAvailableSeatIndices());
   const displayMap = new Map();
   const count = Math.min(shuffledNames.length, shuffledIndices.length);
@@ -230,7 +234,7 @@ async function runCountdown(seconds) {
   }
   DOM.countdownOverlay.hidden = true;
 }
-
+//REVIEW - 이름 입력 다이얼로그 만들기. 프라미스 기반으로 만들어서 호출하는 쪽에서 await로 결과 받을 수 있게 했습니다.
 function openInputDialog(title, defaultValue = "") {
   return new Promise((resolve) => {
     DOM.inputTitle.textContent = title;
@@ -238,6 +242,7 @@ function openInputDialog(title, defaultValue = "") {
     DOM.inputModal.hidden = false;
     DOM.inputField.focus();
     DOM.inputField.select();
+    // DOM으로 일단 보여주기 식으로만 하지
 
     const cleanup = () => {
       DOM.inputModal.hidden = true;
@@ -308,10 +313,6 @@ function toggleFixed(idx) {
   const seat = state.seats[idx];
   if (!seat || seat.blocked) {
     setStatus("고정할 수 없는 자리입니다.", "warn");
-    return;
-  }
-  if (!seat.name) {
-    setStatus("먼저 이름을 추가한 후 고정해주세요.", "warn");
     return;
   }
 
@@ -491,7 +492,7 @@ function renderBoard() {
       // 음....하기 싫구만
       fixBtn.classList.toggle("active", seat.fixed && !seat.blocked);
       blockBtn.classList.toggle("active", seat.blocked);
-      fixBtn.disabled = seat.blocked || !seat.name;
+      fixBtn.disabled = seat.blocked;
       clearBtn.disabled = !seat.name && !seat.fixed;
 
       main.addEventListener("click", () => renameSeat(idx));
